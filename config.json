@@ -1,0 +1,36 @@
+{
+    "root": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/",
+    "data_dir": "",
+    "temp_output_dir": "",
+    "audio_output_dir": "",
+    "global_sample_rate": 24000,
+
+    "default_torchaudio_args": {
+        "sample_rate": 0,
+        "input_size": 0,
+        "audio_length": 0,
+        "n_fft": 2048,
+        "win_length": null,
+        "hop_length": 512,
+        "power": 2.0,
+        "center": true,
+        "pad_mode": "reflect",
+        "norm": "slaney",
+        "onesided": true,
+        "n_mels": 128,
+        "mel_scale": "htk",
+        "n_mfcc": 13
+    },
+
+    "default_conformer_ppg_model_args": {
+        "train_config": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/utils/conformer_ppg_model/en_conformer_ctc_att/config.yaml",
+        "model_file": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/utils/conformer_ppg_model/en_conformer_ctc_att/24epoch.pth",
+        "PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/PPGdata",
+        "audio_input": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/RawAudio"
+    },
+
+    "default_WORLD_vocoder_args": {
+        "audio_input": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/RawAudio",
+        "WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata"
+    }
+}
