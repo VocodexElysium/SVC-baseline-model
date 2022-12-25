@@ -3,10 +3,10 @@
     "data_dir": "",
     "temp_output_dir": "",
     "audio_output_dir": "",
-    "global_sample_rate": 24000,
+    "global_sample_rate": 16000,
 
     "default_torchaudio_args": {
-        "sample_rate": 0,
+        "sample_rate": 16000,
         "input_size": 0,
         "audio_length": 0,
         "n_fft": 2048,
@@ -19,7 +19,7 @@
         "onesided": true,
         "n_mels": 128,
         "mel_scale": "htk",
-        "n_mfcc": 13
+        "n_mfcc": 20
     },
 
     "default_conformer_ppg_model_args": {
