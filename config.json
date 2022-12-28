@@ -30,7 +30,19 @@
     },
 
     "default_WORLD_vocoder_args": {
-        "audio_input": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/RawAudio",
-        "WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata"
+        "audio_input": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/segments/wavs",
+        "WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata",
+        "mgc_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/mgcdata"
+    },
+
+    "default_sptk_args": {
+        "nFFTHalf": 1024,
+        "alpha": 0.58,
+        "mcsize": 59
+    },
+
+    "default_gt_ppg_ars": {
+        "textgrids": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/textgrids",
+        "PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/PPGdata"
     }
 }

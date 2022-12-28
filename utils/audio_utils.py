@@ -353,9 +353,9 @@ def AudioToWORLDComps(
         sp = pw.cheaptrick(audio, f0, t, fs)
         ap = pw.d4c(audio, f0, t, fs)
         fid = os.path.basename(wav_file).split(".")[0]
-        bnf_fname_f0 = f"{WORLD_output}/{fid}.WORLD_f0.npy"
-        bnf_fname_sp = f"{WORLD_output}/{fid}.WORLD_sp.npy"
-        bnf_fname_ap = f"{WORLD_output}/{fid}.WORLD_ap.npy"
+        bnf_fname_f0 = f"{WORLD_output}/{fid}.f0.npy"
+        bnf_fname_sp = f"{WORLD_output}/{fid}.sp.npy"
+        bnf_fname_ap = f"{WORLD_output}/{fid}.ap.npy"
         np.save(bnf_fname_f0, f0, allow_pickle=False)
         np.save(bnf_fname_sp, sp, allow_pickle=False)
         np.save(bnf_fname_ap, ap, allow_pickle=False)
