@@ -41,8 +41,15 @@
         "mcsize": 59
     },
 
-    "default_gt_ppg_ars": {
+    "default_grid_args": {
         "textgrids": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/textgrids",
-        "PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/PPGdata"
+        "PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/GRIDdata/PPGsource",
+        "frame_size": 0.01
+    },
+
+    "default_transcription_args": {
+        "transcription_path": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/segments/transcriptions.txt",
+        "PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/transcriptiondata/PPGsource",
+        "frame_size": 0.01
     }
 }

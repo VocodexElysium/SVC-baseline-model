@@ -1,10 +1,13 @@
 import tqdm
 import textgrid
+import math
 
 from utils import *
 import numpy as np
 
-TEXTGRIDPATH = get_config("default_gt_ppg_ars")["textgrids"]
+TEXTGRIDPATH = get_config("default_grid_args")["textgrids"]
+FRAMESIZE = get_config("default_grid_args")["frame_size"]
+PPG_OUTPUT = get_config("default_grid_args")["PPG_output"]
 
 Lookup_Table_i = {
     0: "sentence",
@@ -81,7 +84,7 @@ Lookup_Table_Phoneme = {
 }
 
 
-def grid_process(tg, mode):
+def grid_process(tg, mode, name):
     if mode == 0:
         return
     elif mode == 1:
@@ -93,7 +96,37 @@ def grid_process(tg, mode):
     elif mode == 4:
         return
     elif mode == 5:
-        return
+        res = np.zeros(shape=(1, int(math.ceil(tg.maxTime / FRAMESIZE))))
+        phoneme_iter = 0
+        phoneme_time = 0
+        grid_iter = 0
+        while grid_iter < len(tg.intervals):
+            if grid_iter == len(tg.intervals) - 1:
+                # print()
+                res[0][phoneme_iter: -1] = Lookup_Table_Phoneme[tg[grid_iter].mark.strip()]
+                break
+            elif phoneme_time + FRAMESIZE<= tg[grid_iter].maxTime:
+                res[0][phoneme_iter] = Lookup_Table_Phoneme[tg[grid_iter].mark.strip()]
+                phoneme_iter += 1
+                phoneme_time += FRAMESIZE
+                continue
+            else:
+                if abs(phoneme_time + FRAMESIZE - tg[grid_iter].maxTime) <= 0.5000000:
+                    res[0][phoneme_iter] = Lookup_Table_Phoneme[tg[grid_iter].mark.strip()]
+                    phoneme_iter += 1
+                    grid_iter += 1
+                    phoneme_time += FRAMESIZE
+                    continue
+                else:
+                    grid_iter += 1
+                    res[0][phoneme_iter] = Lookup_Table_Phoneme[tg[grid_iter].mark.strip()]
+                    phoneme_iter += 1
+                    phoneme_time += FRAMESIZE
+                    continue
+        # for i in range(res.shape[1]):
+        #     print(res[0][i], end=" ")
+        res_fname = f"{PPG_OUTPUT}/{name}.npy"
+        np.save(res_fname, res, allow_pickle=False)
     elif mode == 6:
         return
 
@@ -103,9 +136,9 @@ if __name__ == "__main__":
     files_path = [(pjoin(path, file), file.split('.')[0]) for file in data]
     tmp = 0
     for file in files_path:
+        # if file[1] != "2001":
+        #     continue
         tg = textgrid.TextGrid.fromFile(file[0])
         for i in range(7):
-            if i == 5:
-                tmp = max(tmp, tg[i])
-            res = grid_process(tg[i], i)
+            res = grid_process(tg[i], i, file[1])
             
