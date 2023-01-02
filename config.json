@@ -30,9 +30,12 @@
     },
 
     "default_WORLD_vocoder_args": {
-        "audio_input": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/segments/wavs",
-        "WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata",
-        "mgc_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/mgcdata"
+        "opencpop_audio_input": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/segments/wavs",
+        "opencpopbeta_audio_input": "/mntnfs/lee_data1/zhangxueyao/dataset/OpencpopBeta/utt_wavs",
+        "opencpop_WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata/opencpop",
+        "opencpopbeta_WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata/opencpopbeta",
+        "opencpop_mgc_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/mgcdata/opencpop",
+        "opencpopbeta_mgc_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/mgcdata/opencpopbeta"
     },
 
     "default_sptk_args": {
@@ -48,8 +51,14 @@
     },
 
     "default_transcription_args": {
-        "transcription_path": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/segments/transcriptions.txt",
-        "PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/transcriptiondata/PPGsource",
+        "opencpop_transcription_path": "/mntnfs/lee_data1/zhangxueyao/dataset/Opencpop/segments/transcriptions.txt",
+        "opencpopbeta_transcription_path": "/mntnfs/lee_data1/zhangxueyao/dataset/OpencpopBeta/transcriptions.txt",
+        "opencpop_PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/transcriptiondata/opencpop",
+        "opencpopbeta_PPG_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/transcriptiondata/opencpopbeta",
         "frame_size": 0.01
+    },
+
+    "default_torch_args": {
+        "gradient_path": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/gradientdata"
     }
 }

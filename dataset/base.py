@@ -1,11 +1,34 @@
 from torch.utils.data import Dataset
 from utils.audio_utils import *
 
-class AudioDataset(Dataset):
-    """"""
-    def __init__(self, name=None, splits=None, with_gradient=False):
-        self.name = name
-        self.splits = splits
-        self.path = pjoin(get_config("data_dir"), name)
-        data = ListFiles(self.path, ordered=True)
-        self.ppg = [pjoin(self.path, file) for file in data if ]
+def ParamDataset(Dataset):
+    def __init__(self, name=None):
+        if name is not None:
+            self.name = name
+            self.ppg_path = get_config("default_transcription_args")["PPG_output"]
+            self.mgc_path = get_config("default_WORLD_vocoder_args")["mgc_output"]
+            ppg_data = ListFiles(self.ppg_path, ordered=True)
+            mgc_data = ListFiles(self.mgc_path, ordered=True)
+            self.ppg = [pjoin(self.ppg_path, file) for file in ppg_data]
+            self.mgc = [pjoin(self.mgc_data, file) for file in mgc_data]
+        else:
+            self.name = None
+            self.ppg_path = None
+            self.mgc_path = None
+            self.ppg = None
+            self.mgc = None
+
+    def __len__(self):
+        return len(self.ppg)
+
+    def __getitem__(self, i):
+        ppg = np.load(self.ppg[i])
+        mgc = torch.load(self.mgc[i])
+        return MemberDict({'main': ppg}), mgc
+
+    def __str__(self):
+        if self.name is not None:
+            res = f"{self.name}(len={len(self)})"
+        else:
+            res = "null"
+        return res

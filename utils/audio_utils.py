@@ -2,6 +2,7 @@ import os
 import torch
 import glob2
 import librosa
+import diffsptk
 
 import torchaudio.functional as F
 import torchaudio.transforms as T
@@ -332,33 +333,16 @@ def AlignAudioLength(audio1, audio2, mode='pad', trim_scale=1e-5, fixed=None):
         new_audio2 = AdjustAudioLength(audio2, target_length=fixed, force_trim=True)
     return new_audio1, new_audio2
 
-def AudioToWORLDComps(
-    audio_input=get_config("default_WORLD_vocoder_args")["audio_input"],
-    WORLD_output=get_config("default_WORLD_vocoder_args")["WORLD_output"],
-):
-    """Convert raw audio into WORLD vocoder components."""
-    wav_file_list = glob2.glob(f"{audio_input}/**/*.wav")
-    print(f"Globbing {len(wav_file_list)} wav files.")
-    os.makedirs(WORLD_output, exist_ok=True)
-    for wav_file in tqdm(wav_file_list):
-        audio, fs = sf.read(wav_file, always_2d=False)
-        # print(f"this is {fs}")
-        if fs != SAMPLE_RATE:
-            # print(fs, SAMPLE_RATE)
-            audio = librosa.resample(audio, orig_sr=fs, target_sr=SAMPLE_RATE)
-            fs = SAMPLE_RATE
-        # print(fs)
-        _f0, t = pw.dio(audio, fs)
-        f0 = pw.stonemask(audio, _f0, t, fs)
-        sp = pw.cheaptrick(audio, f0, t, fs)
-        ap = pw.d4c(audio, f0, t, fs)
-        fid = os.path.basename(wav_file).split(".")[0]
-        bnf_fname_f0 = f"{WORLD_output}/{fid}.f0.npy"
-        bnf_fname_sp = f"{WORLD_output}/{fid}.sp.npy"
-        bnf_fname_ap = f"{WORLD_output}/{fid}.ap.npy"
-        np.save(bnf_fname_f0, f0, allow_pickle=False)
-        np.save(bnf_fname_sp, sp, allow_pickle=False)
-        np.save(bnf_fname_ap, ap, allow_pickle=False)
+def SP2mgc(x):
+    tmp = diffsptk.ScalarOperation("SquareRoot")(x.float())
+    tmp = diffsptk.ScalarOperation("Multiplication", 32768.0)(tmp)
+    mgc = diffsptk.MelCepstralAnalysis(
+        cep_order=get_config("default_sptk_args")["mcsize"],
+        fft_length=get_config("default_sptk_args")["nFFTHalf"],
+        alpha=get_config("default_sptk_args")["alpha"],
+        n_iter=1
+    )(tmp)
+    return mgc 
 
 def AudioToPPG(
     PPG_output=get_config("default_conformer_ppg_model_args")["PPG_output"],
