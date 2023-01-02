@@ -15,7 +15,6 @@ class SVCModel(pl.LightningModule):
         self.net = net
         self.args = args
         self.learning_rate = args.learning_rate
-        self.loss = args.loss
         
     def forward(self, x):
         return self.net(x)
@@ -47,7 +46,7 @@ class SVCModel(pl.LightningModule):
     def run_batch(self, batch, split='train', batch_idx=-1):
         ppg, mgc = batch
         pred = self(ppg)
-        loss = self.loss(pred, mgc)
+        loss = mseloss(pred, mgc)
         result = {
             'src': batch,
             'prd': pred,

@@ -1,9 +1,9 @@
 from utils import *
 from dataset import DATASET_MAPPING
-from model import get_backbone, Net
+from model import get_backbone, get_classifier, Net
 
 import pytorch_lightning as pl
-from pytorch_lightning.plugins import DeepSpeedPrecisionPlugin
+from pytorch_lightning.plugins import DDPPlugin
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.seed import seed_everything
 from pytorch_lightning.callbacks import StochasticWeightAveraging, LearningRateMonitor, ModelCheckpoint, EarlyStopping
@@ -53,4 +53,57 @@ if __name__=="__main__":
     if args.grad_accum < 0:
         args.grad_accum = -args.grad_accum // args.batch_size
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
+    args.n_gpu = len([d for d in args.cuda.split(', ') if d.strip() != ''])
+
+    seed_everything(args.seed, workers = True)
+
+    net = Net(
+        backbone = get_backbone(args.backbone, args),
+        classifier = get_classifier(args.classifier, args),
+    )
+
+    args.identifier = Identifier(args)
+    SaveJson(args, pjoin("tasks", f"{args.indentifier}.json"), indent=4)
     
+    dataset = DATASET_MAPPING[args.dataset_type](args.dataset)
+    args.datasets = SplitDatasets(dataset, train=0.7, val=0.2, test=0.1)
+
+    if args.wandb:
+        wandb_logger = WandbLogger(
+            project=args.project,
+            entity='<WANDB_ENTITY>',
+            log_model="all",
+            id=args.identifier
+        )
+
+    model = SVCModel(net, args=args)
+    trainer = pl.Trainer(
+        max_epochs = args.num_epochs,
+        gradient_clip_val = 1.0,
+        accumulate_grad_batches = args.grad_accum,
+        callbacks = [
+            StochasticWeightAveraging(),
+            LearningRateMonitor(logging_interval="epoch"),
+            ModelCheckpoint(monitor="valid_celoss", mode="min"),
+            EarlyStopping(monitor="valid_celoss", mode="min", patience=8, check_finite=True),
+        ],
+
+        gpus = args.n_gpu,
+        auto_select_gpus = True,
+
+        logger = wandb_logger if args.wandb else True,
+        log_every_n_steps = 100,
+        
+        benchmark = True,
+        strategy = DDPPlugin(find_unused_parameters = (args.model == 'group')),
+        limit_train_batches = args.limit_train_batches,
+        limit_val_batches = args.limit_val_batches,
+
+        auto_lr_find = False
+    )
+
+    if args.wandb:
+        wandb_logger.watch(model)
+    
+    trainer.fit(model)
+    trainer.test(ckpt_path="best")
