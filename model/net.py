@@ -21,6 +21,7 @@ class Net(nn.Module):
         self.classifier = classifier
         
     def forward(self, x):
+        x = torch.squeeze(x, 1)
         x = nn.Embedding(62, 62, 0)(x)
         x = self.backbone(x)
         x = x.flatten(start_dim=1)

@@ -6,4 +6,4 @@ class MainBackbone(nn.Module):
         self.net = net
     
     def forward(self, x):
-        return self.net(x['main'].unsqueeze(1))
+        return self.net(x.unsqueeze(1))

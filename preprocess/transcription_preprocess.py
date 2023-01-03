@@ -74,14 +74,18 @@ Lookup_Table_Phoneme = {
     'zh': 61
 }
 
-def TranscriptionToPPG(transcription_input, PPG_output):
+def TranscriptionToPPG(transcription_input, PPG_output, mode):
+    if mode == "opencpop":
+        phoneme_duration_pos = 4
+    elif mode == "opencpopbeta":
+        phoneme_duration_pos = 5
     with open(transcription_input, "r") as f:
         for tmp_data in f.readlines():
             tmp_data = tmp_data.strip('\n')
             tmp_data = tmp_data.split('|')
             tmp_name = tmp_data[0]
             tmp_phonemes = tmp_data[2].split(" ")
-            tmp_durations = tmp_data[4].split(" ")
+            tmp_durations = tmp_data[phoneme_duration_pos].split(" ")
             for i in range(len(tmp_durations)):
                 tmp_durations[i] = float(tmp_durations[i])
                 tmp_durations[i] = int(tmp_durations[i] / FRAME_SIZE + 0.5)
@@ -92,9 +96,10 @@ def TranscriptionToPPG(transcription_input, PPG_output):
                 tmp_res[tmp_sum: tmp_sum + tmp_durations[i]] = Lookup_Table_Phoneme[tmp_phonemes[i]]
                 tmp_sum = tmp_sum + tmp_durations[i]
             tmp_dir = f"{PPG_output}/{tmp_name}.npy"
+            tmp_res = pad_numpy(tmp_res, 2048)
             np.save(tmp_dir, tmp_res, allow_pickle=False)
 
 if __name__ == "__main__":
-    TranscriptionToPPG(OPENCPOP_TRANSCRIPTION_PATH, OPENCPOP_PPG_OUTPUT)
-    TranscriptionToPPG(OPENCPOPBETA_TRANSCRIPTION_PATH, OPENCPOPBETA_PPG_OUTPUT)
+    TranscriptionToPPG(OPENCPOP_TRANSCRIPTION_PATH, OPENCPOP_PPG_OUTPUT, "opencpop")
+    TranscriptionToPPG(OPENCPOPBETA_TRANSCRIPTION_PATH, OPENCPOPBETA_PPG_OUTPUT, "opencpopbeta")
     

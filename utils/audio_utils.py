@@ -344,6 +344,16 @@ def SP2mgc(x):
     )(tmp)
     return mgc 
 
+def mgc2SP(x):
+    tmp = diffsptk.MelGeneralizedCepstrumToSpectrum(
+        alpha=get_config("default_sptk_args")["alpha"],
+        cep_order=get_config("default_sptk_args")["mcsize"],
+        fft_length=get_config("default_sptk_args")["nFFTHalf"],
+    )(x)
+    tmp = diffsptk.ScalarOperation("Division", 32768.0)(tmp)
+    sp = diffsptk.ScalarOperation("Power", 2)(tmp)
+    return sp.double()
+
 def AudioToPPG(
     PPG_output=get_config("default_conformer_ppg_model_args")["PPG_output"],
     audio_input=get_config("default_conformer_ppg_model_args")["audio_input"],
@@ -369,3 +379,14 @@ def AudioToPPG(
         fid = os.path.basename(wav_file).split(".")[0]
         bnf_fname = f"{PPG_output}/{fid}.ling_feat.npy"
         np.save(bnf_fname, bnf_npy, allow_pickle=False)
+
+def WORLDresynthesis(
+    name=None,
+    f0=None,
+    sp=None,
+    ap=None,
+    fs=None
+):
+    res = pw.synthesize(f0, sp, ap, fs)
+    path = f"{name}.wav"
+    sf.write(path, res, fs)

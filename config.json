@@ -35,7 +35,8 @@
         "opencpop_WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata/opencpop",
         "opencpopbeta_WORLD_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/WORLDdata/opencpopbeta",
         "opencpop_mgc_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/mgcdata/opencpop",
-        "opencpopbeta_mgc_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/mgcdata/opencpopbeta"
+        "opencpopbeta_mgc_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/mgcdata/opencpopbeta",
+        "test_resynthesis_output": "/mntnfs/lee_data1/guyicheng/SVC-baseline-model/datas/testresynthesis"
     },
 
     "default_sptk_args": {

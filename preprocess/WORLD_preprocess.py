@@ -42,6 +42,7 @@ def WORLDCompsTomgc(WORLD_input, mgc_output):
     for file in files_path:
         file_sp = torch.from_numpy(np.load(file[0]))
         res = SP2mgc(file_sp)
+        res = pad_tensor(res, 2048)
         out_path = pjoin(mgc_output, file[1] + '.mgc.pt')
         torch.save(res, out_path)
 
