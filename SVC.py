@@ -46,7 +46,7 @@ class SVCModel(pl.LightningModule):
     def run_batch(self, batch, split='train', batch_idx=-1):
         ppg, mgc = batch
         pred = self(ppg)
-        loss = mseloss(pred, mgc)
+        loss = nn.MSELoss()(pred, mgc)
         result = {
             'src': batch,
             'prd': pred,
@@ -64,17 +64,23 @@ class SVCModel(pl.LightningModule):
 
     def validation_step(self, val_batch, batch_idx):
         result = self.run_batch(val_batch, split='valid', batch_idx=batch_idx)
-        if torch.any(torch.isnan(result['loss'])):
-            return None
-        else:
-            return result['loss']
+        if batch_idx * self.args.batch_size < self.args.examples:
+            inf_epoch = pjoin("examples", "%05d"%self.current_epoch)
+            CreateFolder(inf_epoch)
+            for i, (prd, mgc) in enumerate(zip(result['prd'], result['mgc'])):
+                instance = batch_idx * len(val_batch) + i
+                torch.save(prd, pjoin(inf_epoch, "%03d_pd.pt"%instance), indent=4)
+                torch.save(mgc, pjoin(inf_epoch, "%03d_gt.pt"%instance), indent=4)
 
     def test_step(self, test_batch, batch_idx):
         result = self.run_batch(test_batch, split='test', batch_idx=batch_idx)
-        if torch.any(torch.isnan(result['loss'])):
-            return None
-        else:
-            return result['loss']
+        if batch_idx * self.args.batch_size < self.args.examples:
+            inf_epoch = pjoin("inference", self.args.identifier)
+            CreateFolder(inf_epoch)
+            for i, (prd, mgc) in enumerate(zip(result['prd'], result['mgc'])):
+                instance = batch_idx * len(test_batch) + i
+                torch.save(prd, pjoin(inf_epoch, "%03d_pd.pt"%instance), indent=4)
+                torch.save(mgc, pjoin(inf_epoch, "%03d_gt.pt"%instance), indent=4)
 
 def SplitDatasets(dataset, train=0.7, val=0.2, test=0.1, cut=-1):
     n = len(dataset)
