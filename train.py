@@ -3,7 +3,7 @@ from dataset import DATASET_MAPPING
 from model import get_backbone, get_classifier, Net
 
 import pytorch_lightning as pl
-from pytorch_lightning.plugins import DDPPlugin
+from pytorch_lightning.strategies import DDPStrategy
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.seed import seed_everything
 from pytorch_lightning.callbacks import StochasticWeightAveraging, LearningRateMonitor, ModelCheckpoint, EarlyStopping
@@ -15,13 +15,9 @@ if __name__=="__main__":
         LiteralArgumentDescriptor("dataset_type", short="dt", choices=DATASET_MAPPING.keys(), default="param"),
         StrArgumentDescriptor("dataset", short="ds", default="WORLD"),
         StrArgumentDescriptor("project", short="pj", default="SVC"),
-        ListArgumentDescriptor("train_splits", short="train", type=str),
-        ListArgumentDescriptor("val_splits", short="val", type=str),
-        ListArgumentDescriptor("test_splits", short="test", type=str),
-        SwitchArgumentDescriptor("split_train_to_val", short="split2val"),
-        SwitchArgumentDescriptor("split_train_to_test", short="split2test"),
     
-        StrArgumentDescriptor("backbone", short="bb", default="multimodal"),
+        StrArgumentDescriptor("backbone", short="bb", default="lstm"),
+        StrArgumentDescriptor("classifier", short="cl", default="parameter"),
         IntArgumentDescriptor("feature_dim", short="f", default=2048),
         IntArgumentDescriptor("num_epochs", short="e", default=30),
         IntArgumentDescriptor("batch_size", short="b", default=2),
@@ -55,6 +51,8 @@ if __name__=="__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
     args.n_gpu = len([d for d in args.cuda.split(', ') if d.strip() != ''])
 
+    # print(args.n_gpu)
+
     seed_everything(args.seed, workers = True)
 
     net = Net(
@@ -66,6 +64,9 @@ if __name__=="__main__":
     SaveJson(args, pjoin("tasks", f"{args.indentifier}.json"), indent=4)
     
     dataset = DATASET_MAPPING[args.dataset_type](args.dataset)
+
+    # print(dataset.device) 
+
     args.datasets = SplitDatasets(dataset, train=0.7, val=0.2, test=0.1)
 
     if args.wandb:
@@ -77,15 +78,22 @@ if __name__=="__main__":
         )
 
     model = SVCModel(net, args=args)
+
+    # print(next(model.parameters()).device)
+    device = torch.device("cuda:0" if (torch.cuda.is_available() and args.n_gpu > 0) else "cpu")
+    model = model.cuda()
+    # print(next(model.parameters()).device)
+
     trainer = pl.Trainer(
         max_epochs = args.num_epochs,
         gradient_clip_val = 1.0,
         accumulate_grad_batches = args.grad_accum,
         callbacks = [
-            StochasticWeightAveraging(),
+            StochasticWeightAveraging(swa_lrs=0.05),
             LearningRateMonitor(logging_interval="epoch"),
-            ModelCheckpoint(monitor="valid_celoss", mode="min"),
-            EarlyStopping(monitor="valid_celoss", mode="min", patience=8, check_finite=True),
+            ModelCheckpoint()
+            # ModelCheckpoint(monitor="valid_celoss", mode="min"),
+            # EarlyStopping(monitor="valid_celoss", mode="min", patience=8, check_finite=True),
         ],
 
         gpus = args.n_gpu,
@@ -95,7 +103,7 @@ if __name__=="__main__":
         log_every_n_steps = 100,
         
         benchmark = True,
-        strategy = DDPPlugin(find_unused_parameters = (args.model == 'group')),
+        strategy = DDPStrategy(find_unused_parameters = (args.model == 'group')),
         limit_train_batches = args.limit_train_batches,
         limit_val_batches = args.limit_val_batches,
 

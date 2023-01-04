@@ -4,7 +4,7 @@ from pyheaven.torch_utils import *
 class LSTMBackbone(nn.Module):
     def __init__(self,
         input_dim = 62,
-        hidden_dim = 1024,
+        hidden_dim = 512,
         num_layers = 3,
         output_dim = 2048,
     ):
@@ -19,9 +19,11 @@ class LSTMBackbone(nn.Module):
             batch_first=True,
             bidirectional=True
         )
-        self.linear = FC(2 * hidden_dim, output_dim, activation=nn.LeakyReLU(inplace=True))
+        self.linear = FC(2 * hidden_dim, output_dim, flatten=False, activation=nn.LeakyReLU(inplace=True))
 
     def forward(self, x):
         y = x
+        # print(y.shape)
         t = self.model(y)[0]
+        # print(t.shape)
         return self.linear(t)

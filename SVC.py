@@ -35,16 +35,20 @@ class SVCModel(pl.LightningModule):
         return [optimizer], [scheduler]
     
     def train_dataloader(self):
-        return HeavenDataLoader(DataLoader(self.args.datasets.train, batch_size=self.args.batch_size, num_workers=8, shuffle=True), self.args.datasets.train)
+        return HeavenDataLoader(DataLoader(self.args.datasets.train, batch_size=self.args.batch_size, num_workers=4, shuffle=True), self.args.datasets.train)
 
     def val_dataloader(self):
-        return HeavenDataLoader(DataLoader(self.args.datasets.val,batch_size=self.args.batch_size,num_workers=8,shuffle=False), self.args.datasets.val)
+        return HeavenDataLoader(DataLoader(self.args.datasets.val,batch_size=self.args.batch_size,num_workers=4,shuffle=False), self.args.datasets.val)
     
     def test_dataloader(self):
-        return HeavenDataLoader(DataLoader(self.args.datasets.test,batch_size=1,num_workers=8,shuffle=False), self.args.datasets.test)
+        return HeavenDataLoader(DataLoader(self.args.datasets.test,batch_size=1,num_workers=4,shuffle=False), self.args.datasets.test)
 
     def run_batch(self, batch, split='train', batch_idx=-1):
         ppg, mgc = batch
+        # print("here")
+        # print(ppg.device)
+        # print("here")
+        # print(self.device)
         pred = self(ppg)
         loss = nn.MSELoss()(pred, mgc)
         result = {
@@ -69,8 +73,8 @@ class SVCModel(pl.LightningModule):
             CreateFolder(inf_epoch)
             for i, (prd, mgc) in enumerate(zip(result['prd'], result['mgc'])):
                 instance = batch_idx * len(val_batch) + i
-                torch.save(prd, pjoin(inf_epoch, "%03d_pd.pt"%instance), indent=4)
-                torch.save(mgc, pjoin(inf_epoch, "%03d_gt.pt"%instance), indent=4)
+                torch.save(prd, pjoin(inf_epoch, "%03d_pd.pt"%instance))
+                torch.save(mgc, pjoin(inf_epoch, "%03d_gt.pt"%instance))
 
     def test_step(self, test_batch, batch_idx):
         result = self.run_batch(test_batch, split='test', batch_idx=batch_idx)
@@ -79,8 +83,8 @@ class SVCModel(pl.LightningModule):
             CreateFolder(inf_epoch)
             for i, (prd, mgc) in enumerate(zip(result['prd'], result['mgc'])):
                 instance = batch_idx * len(test_batch) + i
-                torch.save(prd, pjoin(inf_epoch, "%03d_pd.pt"%instance), indent=4)
-                torch.save(mgc, pjoin(inf_epoch, "%03d_gt.pt"%instance), indent=4)
+                torch.save(prd, pjoin(inf_epoch, "%03d_pd.pt"%instance))
+                torch.save(mgc, pjoin(inf_epoch, "%03d_gt.pt"%instance))
 
 def SplitDatasets(dataset, train=0.7, val=0.2, test=0.1, cut=-1):
     n = len(dataset)

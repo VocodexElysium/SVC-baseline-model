@@ -5,9 +5,9 @@
 #SBATCH --cpus-per-task=6            # Number of CPU cores per task
 # #SBATCH --output=./summit_log/summit_%j.log       # Standard output and error log
 #SBATCH --gres=gpu:1                # Number of GPU cores per task
-#SBATCH --nodelist=pgpu18
+#SBATCH --nodelist=pgpu04
 # #SBATCH --exclude=pgpu14,pgpu17,pgpu22
-#SBATCH --partition=p-A100
+#SBATCH --partition=p-RTX2080
 
 source /cm/shared/apps/anaconda3/etc/profile.d/conda.sh
 conda activate guyicheng
@@ -24,7 +24,7 @@ echo "Number of CUDA_VISIBLE_DEVICES = $CUDA_VISIBLE_DEVICES"
 echo ""
 echo "Running script... "
 
-python test.py
+bash run.sh train.py
 # 13 18 = available
 
 #####------------------------cnn module---------------------------#####
